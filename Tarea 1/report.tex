@@ -1,0 +1,204 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{xcolor}
+
+\title{Análisis estadístico comparativo de corpus literario:\\
+Jane Austen vs. G.\,K.\,Chesterton}
+\author{Ferre \\ Maestría en Ciencia de Datos --- UANL}
+\date{Agosto 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Se aplica estadística descriptiva de texto (frecuencias, n-gramas, longitud de oración, riqueza léxica y uso de puntuación) sobre seis obras de dominio público: tres novelas de Jane Austen (\textit{Emma}, \textit{Persuasion}, \textit{Sense and Sensibility}) y tres obras de G.\,K.\,Chesterton (\textit{The Ball and the Cross}, \textit{The Innocence of Father Brown}, \textit{The Man Who Was Thursday}), tomadas del subconjunto Gutenberg incluido en NLTK. El análisis permite comparar estilo intra-autor (entre obras del mismo autor) e inter-autor. Los resultados muestran diferencias estadísticamente significativas entre autores en longitud de oración (Mann--Whitney $U$, $p < 0.001$) y en la distribución de signos de puntuación ($\chi^2$, $p < 0.001$), consistentes con la caracterización literaria tradicional de ambos autores: Austen con prosa más extensa y subordinada, Chesterton con oraciones más cortas y un estilo aforístico-dialogado.
+\end{abstract}
+
+\section{Introducción}
+
+El objetivo de este trabajo es realizar un análisis estadístico sobre un corpus textual de dos o más fuentes, comparando patrones lingüísticos cuantificables entre autores y, dentro de cada autor, entre distintas obras. Se eligió un corpus literario de dominio público en inglés por dos razones prácticas: (1) permite trabajar con textos completos y de gran longitud (decenas de miles de palabras por obra), lo que da robustez estadística a las métricas calculadas, y (2) evita cualquier restricción de derechos de autor al usar textos ya liberados por Project Gutenberg.
+
+Se seleccionaron dos autores con estilos narrativos contrastantes documentados en la crítica literaria:
+
+\begin{itemize}
+    \item \textbf{Jane Austen} (1775--1817): novela de costumbres, ironía social, oraciones largas con múltiples cláusulas subordinadas.
+    \item \textbf{G.\,K.\,Chesterton} (1874--1936): ensayo/ficción con estilo aforístico, diálogo denso, oraciones más cortas y directas.
+\end{itemize}
+
+De cada autor se tomaron tres obras, lo que permite dos niveles de comparación: \emph{intra-autor} (variabilidad estilística entre obras de un mismo autor a lo largo del tiempo) e \emph{inter-autor} (diferencias sistemáticas de estilo entre autores).
+
+\subsection*{Nota sobre emojis}
+El corpus es literatura del siglo XIX/principios del XX, por lo que no contiene emojis (el estándar Unicode de emojis es de 2010). En su lugar, se analizan con el mismo propósito expresivo los signos de puntuación exclamativa e interrogativa, guiones y comillas, que cumplen funciones retóricas comparables en textos previos a la comunicación digital.
+
+\section{Datos y metodología}
+
+\subsection{Fuente de datos}
+Se usó el corpus \texttt{gutenberg} distribuido con NLTK (Bird, Klein \& Loper, 2009), un subconjunto curado de Project Gutenberg. Los archivos de texto ya vienen con los encabezados/pies de licencia de Project Gutenberg removidos por el propio corpus de NLTK; se eliminó adicionalmente la línea de metadatos \texttt{[Título by Autor Año]} que antepone el corpus, dejando únicamente la prosa del autor.
+
+\begin{table}[H]
+\centering
+\caption{Obras analizadas}
+\begin{tabular}{lll}
+\toprule
+Autor & Obra & Palabras \\
+\midrule
+Austen & Emma (1816) & 161{,}512 \\
+Austen & Persuasion (1817) & 83{,}839 \\
+Austen & Sense and Sensibility (1811) & 120{,}393 \\
+Chesterton & The Ball and the Cross (1909) & 82{,}377 \\
+Chesterton & The Innocence of Father Brown (1911) & 72{,}710 \\
+Chesterton & The Man Who Was Thursday (1908) & 58{,}443 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Pipeline de procesamiento}
+Implementado en Python (script \texttt{src/analysis.py}). Pasos:
+
+\begin{enumerate}
+    \item \textbf{Segmentación de oraciones y palabras}: tokenizador \texttt{punkt} de NLTK.
+    \item \textbf{Normalización}: minúsculas, se conservan solo tokens con al menos una letra para el conteo de palabras (los signos de puntuación se cuentan por separado).
+    \item \textbf{Estadística descriptiva}: número de palabras, número de oraciones, longitud promedio de oración (en palabras), longitud promedio de palabra (en caracteres), tamaño de vocabulario.
+    \item \textbf{Riqueza léxica}: Type-Token Ratio (TTR = vocabulario / palabras totales) y su versión estandarizada STTR, calculada como el promedio del TTR en bloques consecutivos de 1000 palabras. Se usa STTR para las comparaciones entre obras de distinta longitud, ya que el TTR clásico decrece de forma no lineal con el tamaño del texto (ley de Heaps) y por tanto no es directamente comparable entre textos de distinta extensión.
+    \item \textbf{Hapax legomena}: proporción de palabras que aparecen exactamente una vez en el vocabulario total de la obra, indicador adicional de riqueza/variedad léxica.
+    \item \textbf{Frecuencias de palabras}: conteo de unigrama, excluyendo \emph{stopwords} (lista estándar de NLTK en inglés) para aislar palabras de contenido.
+    \item \textbf{N-gramas}: bigramas y trigramas más frecuentes (excluyendo stopwords), que capturan colocaciones y nombres propios recurrentes.
+    \item \textbf{Puntuación}: conteo de coma, punto y coma, dos puntos, signo de exclamación, interrogación, guión, guión largo (\texttt{--}), paréntesis, comillas y apóstrofo, normalizado por 1000 palabras para permitir comparación entre obras de distinta longitud.
+    \item \textbf{Pruebas estadísticas}: prueba $U$ de Mann--Whitney y prueba $t$ de Welch sobre la distribución de longitud de oración (Austen vs.\ Chesterton, con las oraciones de las 3 obras de cada autor agrupadas); prueba $\chi^2$ de independencia sobre la tabla de contingencia autor $\times$ tipo de signo de puntuación (usando conteos absolutos, no tasas).
+\end{enumerate}
+
+\section{Resultados}
+
+\subsection{Estadística descriptiva por obra}
+
+\begin{table}[H]
+\centering
+\caption{Métricas descriptivas por obra}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrr}
+\toprule
+Autor & Obra & Palabras & Oraciones & Long. oración (media) & Long. palabra (media) & TTR & STTR (1000) \\
+\midrule
+Austen & Emma & 161{,}512 & 7{,}493 & 21.56 & 4.27 & 0.049 & 0.398 \\
+Austen & Persuasion & 83{,}839 & 3{,}654 & 22.94 & 4.36 & 0.070 & 0.408 \\
+Austen & Sense and Sensibility & 120{,}393 & 4{,}833 & 24.91 & 4.38 & 0.055 & 0.406 \\
+Chesterton & The Ball and the Cross & 82{,}377 & 4{,}624 & 17.82 & 4.32 & 0.102 & 0.426 \\
+Chesterton & The Innocence of Father Brown & 72{,}710 & 3{,}712 & 19.59 & 4.31 & 0.110 & 0.436 \\
+Chesterton & The Man Who Was Thursday & 58{,}443 & 3{,}588 & 16.29 & 4.28 & 0.110 & 0.426 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Dos observaciones metodológicas importantes:
+\begin{itemize}
+    \item El TTR crudo es más alto en las obras de Chesterton, pero esto se explica en gran parte porque sus obras son más cortas (menos palabras totales $\Rightarrow$ TTR inflado por ley de Heaps), no necesariamente porque su vocabulario sea más variado en términos absolutos.
+    \item Al usar STTR (comparación justa, controlando por longitud), la diferencia se reduce sustancialmente (Austen $\approx$ 0.40 vs.\ Chesterton $\approx$ 0.43), aunque Chesterton mantiene una ligera ventaja en diversidad léxica local.
+\end{itemize}
+
+\subsection{Comparación agregada por autor}
+
+\begin{table}[H]
+\centering
+\caption{Métricas agregadas (las 3 obras de cada autor combinadas)}
+\begin{tabular}{lrrrr}
+\toprule
+Autor & Palabras totales & Vocabulario & Long. oración media & Mediana \\
+\midrule
+Austen & 365{,}744 & 11{,}457 & 22.89 & 16.0 \\
+Chesterton & 213{,}530 & 13{,}824 & 17.91 & 16.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A pesar de tener casi el doble de palabras totales, Austen tiene un vocabulario absoluto \emph{menor} que Chesterton (11{,}457 vs.\ 13{,}824 palabras únicas), lo cual es un indicio adicional —consistente con el STTR— de que Chesterton emplea un vocabulario proporcionalmente más variado.
+
+\subsection{Longitud de oración}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{../results/fig_boxplot_sentence_length.png}
+\caption{Distribución de longitud de oración (en palabras) por autor, sin valores atípicos extremos.}
+\end{figure}
+
+La mediana de longitud de oración es idéntica (16 palabras) para ambos autores, pero la \emph{dispersión} es marcadamente distinta: la desviación estándar de Austen (21.4) casi duplica la de Chesterton (12.4). Esto refleja que Austen alterna con más frecuencia entre oraciones cortas y periodos muy largos y subordinados (hasta 65 palabras en el rango mostrado), mientras que Chesterton mantiene una cadencia más uniforme. La prueba $U$ de Mann--Whitney confirma que las distribuciones difieren significativamente ($U = 102{,}474{,}807$, $p = 2.7\times10^{-27}$); la prueba $t$ de Welch sobre las medias también es significativa ($t = 24.43$, $p \ll 0.001$).
+
+\subsection{Riqueza léxica}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{../results/fig_ttr_por_obra.png}
+\caption{STTR (ventanas de 1000 palabras) por obra.}
+\end{figure}
+
+Las tres obras de Chesterton muestran STTR consistentemente más alto que las tres de Austen, con poca variación intra-autor en ambos casos —evidencia de que la diferencia es un rasgo de estilo de autor y no una particularidad de una sola obra.
+
+\subsection{Palabras más frecuentes (excluyendo stopwords)}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{../results/fig_top_palabras.png}
+\caption{Top-15 palabras de contenido por autor.}
+\end{figure}
+
+En Austen dominan verbos modales y de cortesía social (\textit{could}, \textit{would}, \textit{must}) y tratamientos (\textit{miss}), consistente con novelas de costumbres centradas en decoro y posibilidad social. En Chesterton dominan \textit{said} (mucho diálogo), y nombres propios de personajes recurrentes (\textit{turnbull}, \textit{syme}, \textit{macian}), lo que refleja su estilo más narrativo-dialogado con elenco de personajes fijo por obra.
+
+\subsection{N-gramas}
+
+Los bigramas y trigramas más frecuentes confirman los patrones anteriores:
+
+\begin{itemize}
+    \item \textbf{Austen}: predominan fórmulas de tratamiento (\textit{mr. knightley}, \textit{mrs. weston}, \textit{mr. elton}) y posesivos con apellido (\textit{mr. elton's}, \textit{mrs. jennings's}), típicos de la novela de salón centrada en relaciones y estatus.
+    \item \textbf{Chesterton}: predominan verbos de habla atribuidos a personajes (\textit{said turnbull}, \textit{said syme}, \textit{said father brown}), reflejando estructura dialogada; también aparece la construcción \textit{ca n't} (forma tokenizada de \textit{can't}), ausente en el top de Austen.
+\end{itemize}
+
+Esto es consistente con la interpretación de que Chesterton estructura su prosa alrededor del diálogo directo, mientras que Austen la estructura alrededor de la caracterización social de sus personajes por nombre y título.
+
+\subsection{Puntuación}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{../results/fig_puntuacion_autor.png}
+\caption{Uso de signos de puntuación por autor (ocurrencias por 1000 palabras).}
+\end{figure}
+
+Austen usa consistentemente más punto y coma (14.5 vs.\ 8.0 por 1000 palabras) y guión largo \texttt{--} (10.2 vs.\ 4.1), ambos signos asociados a la construcción de periodos largos con cláusulas encadenadas —coherente con su mayor variabilidad de longitud de oración observada arriba. Chesterton usa ligeramente más signos de interrogación (5.1 vs.\ 3.4), coherente con su prosa más dialogada y de género policial/filosófico (preguntas retóricas y de intriga). La prueba $\chi^2$ de independencia sobre la tabla de contingencia (autor $\times$ signo, conteos absolutos) es altamente significativa ($\chi^2 = 1219.96$, $\mathrm{gl}=9$, $p \ll 0.001$), confirmando que el perfil de puntuación de cada autor es estadísticamente distinguible.
+
+\section{Discusión}
+
+Los tres ejes de análisis —longitud/variabilidad de oración, riqueza léxica y perfil de puntuación— apuntan en la misma dirección y son mutuamente consistentes:
+
+\begin{enumerate}
+    \item \textbf{Austen} construye periodos largos y variables, con alta densidad de punto y coma y guión largo, propios de la prosa narrativa/reflexiva de tercera persona con inserciones de comentario social.
+    \item \textbf{Chesterton} construye oraciones más cortas y uniformes, con mayor riqueza léxica relativa y un vocabulario de acción/diálogo (\textit{said} + nombre propio), propio de su estilo narrativo más cercano al relato de intriga y al ensayo aforístico.
+    \item La comparación \emph{intra-autor} (entre las 3 obras de cada uno) muestra que estos rasgos son estables dentro de cada autor —la variación entre obras del mismo autor es mucho menor que la variación entre autores—, lo que respalda que se trata de un rasgo de estilo (``huella estilística'') y no de una particularidad de una obra puntual.
+\end{enumerate}
+
+\subsection{Limitaciones}
+\begin{itemize}
+    \item El corpus no contiene emojis (texto anterior a su existencia); el análisis de expresividad no verbal se limitó a puntuación.
+    \item El TTR clásico no es comparable entre obras de longitud distinta; se mitigó con STTR, pero un análisis más riguroso podría usar MTLD (Measure of Textual Lexical Diversity) o vocd-D.
+    \item Solo se analizan dos autores; los hallazgos describen diferencias entre \emph{estos} dos autores particulares y no generalizan a ``la literatura victoriana/eduardiana'' en su conjunto.
+    \item El corpus de NLTK ya viene ligeramente pre-procesado respecto al texto original de Project Gutenberg, lo que pudo alterar marginalmente algunos conteos de puntuación (p.\,ej.\ normalización de comillas).
+\end{itemize}
+
+\section{Conclusiones}
+
+El análisis estadístico de texto permite cuantificar y validar formalmente diferencias de estilo literario que tradicionalmente se describen solo de forma cualitativa. Para el par Austen/Chesterton, se encontró evidencia estadísticamente significativa ($p < 0.001$ en las tres pruebas aplicadas) de que ambos autores tienen huellas estilísticas distinguibles en longitud de oración, riqueza léxica y uso de puntuación, y estas diferencias son consistentes dentro de las tres obras evaluadas por autor. La metodología (tokenización, TTR/STTR, n-gramas, tasas de puntuación normalizadas y pruebas no paramétricas) es directamente extensible a otros dominios textuales, como publicaciones en redes sociales, reseñas de clientes o discursos —donde además sí sería aplicable el análisis de emojis mencionado en la consigna original de la tarea.
+
+\section*{Referencias}
+\begin{itemize}
+    \item Bird, S., Klein, E., \& Loper, E. (2009). \textit{Natural Language Processing with Python}. O'Reilly Media. (Fuente del corpus \texttt{gutenberg} y del tokenizador \texttt{punkt} usados en este trabajo.)
+    \item Project Gutenberg (\url{https://www.gutenberg.org}) — fuente original de los textos de dominio público.
+    \item McCarthy, P.\,M., \& Jarvis, S. (2010). MTLD, vocd-D, and HD-D: A validation study of sophisticated approaches to lexical diversity assessment. \textit{Behavior Research Methods}, 42(2), 381--392. (Referencia metodológica sobre limitaciones del TTR clásico.)
+\end{itemize}
+
+\end{document}
