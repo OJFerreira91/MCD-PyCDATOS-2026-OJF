@@ -1,0 +1,5 @@
+modelo,mejor_vectorizador,mejor_ngram_range,mejores_hiperparametros,cv_f1_macro_mean,cv_f1_macro_std,test_accuracy,test_f1_macro,tiempo_busqueda_seg,n_combinaciones_evaluadas
+MultinomialNB,CountVectorizer,"(1, 1)",{'alpha': 0.3},0.9679506876617128,0.014721390346982253,0.9820224719101124,0.98149871602728,131.8,12
+LinearSVC,TfidfVectorizer,"(1, 1)",{'C': 1},0.9727679798754478,0.009229713940731559,0.9797752808988764,0.9787847422644429,172.5,12
+LogisticRegression,TfidfVectorizer,"(1, 1)",{'C': 10},0.9737794064080477,0.008636903885397085,0.9752808988764045,0.9742462559253399,227.7,12
+RandomForest,CountVectorizer,"(1, 1)","{'max_depth': None, 'n_estimators': 250}",0.9591814243695402,0.010894115059728648,0.9707865168539326,0.9708962331308099,543.3,16
