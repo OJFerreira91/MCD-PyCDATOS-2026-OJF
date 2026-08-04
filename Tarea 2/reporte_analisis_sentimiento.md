@@ -1,6 +1,6 @@
 ---
 title: "Análisis de Sentimiento sobre Reseñas de Usuarios: Vectorización TF-IDF y Comparación con Calificación Numérica"
-author: "Ferre"
+author: "OScar Jaime Ferreira"
 date: "Agosto 2026"
 geometry: margin=2.5cm
 fontsize: 11pt
@@ -34,7 +34,7 @@ La distribución de `Rating` está fuertemente sesgada hacia calificaciones alta
 tiene calificación 5 y solo el 3.6% tiene calificación 1, un patrón típico de autoselección en
 plataformas de e-commerce (clientes satisfechos dejan reseña con mayor frecuencia).
 
-![Distribución de Rating y longitud de reseña](figs/rating_vs_recommended.png){width=85%}
+![Distribución de Rating y longitud de reseña](figs/rating_vs_recommended.png)
 
 # 3. Metodología
 
