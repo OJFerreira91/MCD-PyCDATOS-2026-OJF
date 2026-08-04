@@ -1,0 +1,61 @@
+author,n,ngram,count
+Austen,2,mr. knightley,277
+Austen,2,mrs. weston,249
+Austen,2,mrs. jennings,229
+Austen,2,mr. elton,214
+Austen,2,every thing,209
+Austen,2,captain wentworth,196
+Austen,2,mr elliot,174
+Austen,2,miss woodhouse,171
+Austen,2,mr. weston,162
+Austen,2,every body,148
+Austen,2,frank churchill,148
+Austen,2,lady russell,147
+Austen,2,mrs. elton,142
+Austen,2,mr. woodhouse,132
+Austen,2,young man,132
+Austen,3,mr. frank churchill,48
+Austen,3,mr. elton 's,38
+Austen,3,mrs. goddard 's,33
+Austen,3,mrs. jennings 's,31
+Austen,3,lady russell 's,29
+Austen,3,mr. knightley 's,28
+Austen,3,mr. john knightley,28
+Austen,3,mrs. weston 's,27
+Austen,3,mrs. elton 's,27
+Austen,3,mr elliot 's,27
+Austen,3,captain wentworth 's,26
+Austen,3,mr. woodhouse 's,25
+Austen,3,mrs. john dashwood,25
+Austen,3,mr. weston 's,24
+Austen,3,dear miss woodhouse,24
+Chesterton,2,father brown,204
+Chesterton,2,said turnbull,121
+Chesterton,2,said syme,121
+Chesterton,2,ca n't,103
+Chesterton,2,said macian,84
+Chesterton,2,man 's,67
+Chesterton,2,dr. bull,65
+Chesterton,2,n't know,57
+Chesterton,2,said father,56
+Chesterton,2,looked like,45
+Chesterton,2,could see,43
+Chesterton,2,yes said,43
+Chesterton,2,let us,43
+Chesterton,2,said professor,42
+Chesterton,2,turnbull 's,39
+Chesterton,3,said father brown,56
+Chesterton,3,said dr. bull,24
+Chesterton,3,professor de worms,17
+Chesterton,3,st. paul 's,13
+Chesterton,3,asked father brown,13
+Chesterton,3,ca n't see,11
+Chesterton,3,sir wilson seymour,10
+Chesterton,3,editor _the atheist_,9
+Chesterton,3,mr. wilkinson 's,9
+Chesterton,3,pilgrim 's pond,9
+Chesterton,3,said old man,8
+Chesterton,3,father brown said,8
+Chesterton,3,sir claude champion,8
+Chesterton,3,could almost fancy,7
+Chesterton,3,answered father brown,7

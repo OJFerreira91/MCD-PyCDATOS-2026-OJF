@@ -1,0 +1,15 @@
+{
+  "sentence_length_mannwhitney": {
+    "U": 102474807.0,
+    "p_value": 2.6655750482454535e-27
+  },
+  "sentence_length_welch_t": {
+    "t": 24.434643000800303,
+    "p_value": 2.0537773409400714e-130
+  },
+  "punctuation_chi2": {
+    "chi2": 1219.9639600242742,
+    "p_value": 5.938165141241258e-257,
+    "dof": 9
+  }
+}
