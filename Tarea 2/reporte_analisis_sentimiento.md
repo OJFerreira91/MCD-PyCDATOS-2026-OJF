@@ -1,13 +1,13 @@
 ---
 title: "Análisis de Sentimiento sobre Reseñas de Usuarios: Vectorización TF-IDF y Comparación con Calificación Numérica"
-author: "OScar Jaime Ferreira"
+author: "Oscar Jaime Ferreira"
 date: "Agosto 2026"
 geometry: margin=2.5cm
 fontsize: 11pt
 toc: true
 ---
 
-\newpage
+
 
 # 1. Introducción y objetivo
 
@@ -91,7 +91,7 @@ librería para clasificar cada reseña:
 Para comparar contra el `Rating` numérico, se definió una etiqueta "esperada" por calificación:
 `Rating <= 2 → negativo`, `Rating = 3 → neutral`, `Rating >= 4 → positivo`.
 
-\newpage
+
 
 # 4. Resultados
 
