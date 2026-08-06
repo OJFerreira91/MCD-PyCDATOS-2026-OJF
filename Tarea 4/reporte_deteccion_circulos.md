@@ -21,7 +21,7 @@ Para cada imagen se aplicó la misma secuencia:
    - `minRadius` / `maxRadius`: rango de tamaño esperado del objeto, en píxeles.
 4. **Marcado de resultados** — se dibuja el contorno detectado (verde) y el centro (rojo) sobre la imagen original.
 
-El código completo y reproducible está en `deteccion_circulos.ipynb`.
+El código completo y reproducible está en `deteccion_circulos.py`.
 
 > **Nota sobre las imágenes:** no conté con fotos propias de objetos circulares al momento de hacer la tarea, así que usé tres imágenes reales de dominio público (fuente: dataset estándar de `scikit-image`, originalmente provenientes de bancos de imágenes de Internet): monedas, un reloj y una superficie lunar. Esto permite mostrar la técnica en tres contextos distintos en vez de repetir el mismo ejemplo de clase.
 
@@ -29,11 +29,9 @@ El código completo y reproducible está en `deteccion_circulos.ipynb`.
 
 **Parámetros:** `dp=1.2, minDist=40, param1=50, param2=30, minRadius=15, maxRadius=45`
 
-![Pipeline monedas](imagenes/coins_proceso.png)
+![Pipeline monedas](img_out/coins_proceso.png)
 
-**Resultado:** 24 de 24 monedas detectadas correctamente (100%), incluyendo monedas de distinto tamaño y con relieve visual complejo (bordes irregulares por el grabado). El desenfoque gaussiano fue clave para que Canny no confundiera el detalle interno del grabado con el borde exterior de la moneda.
-
-![Monedas detectadas](imagenes/coins_detectado.png)
+**Resultado:** 24 de 24 monedas detectadas correctamente (100%), incluyendo monedas de distinto tamaño y con relieve visual complejo (bordes irregulares por el grabado). El desenfoque gaussiano fue clave para que Canny no confundiera el detalle interno del grabado con el borde exterior de la moneda (ver último panel de la figura arriba).
 
 Radios detectados: van de 18 a 31 px, consistente con las monedas más chicas y más grandes de la imagen.
 
@@ -41,11 +39,9 @@ Radios detectados: van de 18 a 31 px, consistente con las monedas más chicas y 
 
 **Parámetros:** `dp=1.2, minDist=100, param1=50, param2=30, minRadius=50, maxRadius=200`
 
-![Pipeline reloj](imagenes/clock_proceso.png)
+![Pipeline reloj](img_out/clock_proceso.png)
 
 **Resultado:** 1 círculo detectado, centro en `(208, 148)`, radio 52 px — coincide bien con el contorno visible del reloj a pesar del desenfoque de movimiento (motion blur) de la foto original. Esto muestra que la técnica es razonablemente robusta a desenfoque, siempre que el borde del objeto conserve algo de gradiente de intensidad.
-
-![Reloj detectado](imagenes/clock_detectado.png)
 
 ## 5. Caso 3 — Cráteres lunares (dominio distinto: fotografía astronómica)
 
@@ -54,8 +50,6 @@ Radios detectados: van de 18 a 31 px, consistente con las monedas más chicas y 
 ![Pipeline luna](img_out/moon_proceso.png)
 
 **Resultado:** 3 cráteres detectados. El cráter grande superior izquierdo (centro `(119, 87)`, radio 25 px) se detecta con alta confianza porque tiene un borde circular limpio e iluminación uniforme. Los dos cráteres inferiores (radios 12–15 px) están en una zona de sombras irregulares y se detectaron con más ruido — es el caso donde más tuve que ajustar `param2` y `minDist` hacia arriba para eliminar falsos positivos (formas irregulares que casi parecían círculos).
-
-![Luna detectada](imagenes/moon_detectado.png)
 
 ## 6. Hallazgos y conclusiones
 
