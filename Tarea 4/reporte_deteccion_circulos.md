@@ -21,7 +21,7 @@ Para cada imagen se aplicó la misma secuencia:
    - `minRadius` / `maxRadius`: rango de tamaño esperado del objeto, en píxeles.
 4. **Marcado de resultados** — se dibuja el contorno detectado (verde) y el centro (rojo) sobre la imagen original.
 
-El código completo y reproducible está en `deteccion_circulos.py`.
+El código completo y reproducible está en `deteccion_circulos.ipynb`.
 
 > **Nota sobre las imágenes:** no conté con fotos propias de objetos circulares al momento de hacer la tarea, así que usé tres imágenes reales de dominio público (fuente: dataset estándar de `scikit-image`, originalmente provenientes de bancos de imágenes de Internet): monedas, un reloj y una superficie lunar. Esto permite mostrar la técnica en tres contextos distintos en vez de repetir el mismo ejemplo de clase.
 
