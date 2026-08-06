@@ -51,7 +51,7 @@ Radios detectados: van de 18 a 31 px, consistente con las monedas más chicas y 
 
 **Parámetros:** `dp=1.2, minDist=30, param1=60, param2=28, minRadius=8, maxRadius=40, blur=5`
 
-![Pipeline luna](imagenes/moon_proceso.png)
+![Pipeline luna](img_out/moon_proceso.png)
 
 **Resultado:** 3 cráteres detectados. El cráter grande superior izquierdo (centro `(119, 87)`, radio 25 px) se detecta con alta confianza porque tiene un borde circular limpio e iluminación uniforme. Los dos cráteres inferiores (radios 12–15 px) están en una zona de sombras irregulares y se detectaron con más ruido — es el caso donde más tuve que ajustar `param2` y `minDist` hacia arriba para eliminar falsos positivos (formas irregulares que casi parecían círculos).
 
