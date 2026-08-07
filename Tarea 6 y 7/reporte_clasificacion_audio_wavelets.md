@@ -35,11 +35,11 @@ El entorno de ejecución usado para el desarrollo inicial de este pipeline no te
 - Se añadió ruido blanco aditivo con SNR aleatorio entre 3 y 15 dB por muestra, para simular condiciones de grabación no controladas (aunque, como se ve en la sección 5, no fue suficiente para evitar que el problema resultara completamente separable para ambos modelos).
 - Parámetros de cada generador (frecuencia fundamental, tasas de decaimiento, centro/ancho del filtro, etc.) se muestrean aleatoriamente por muestra para introducir variabilidad intra-clase.
 
-Código de generación: [`generar_dataset.py`](generar_dataset.py).
+Código: celdas de generación de dataset en [`clasificacion_audio_wavelets_sintetico.ipynb`](clasificacion_audio_wavelets_sintetico.ipynb) (sección 1 del notebook).
 
 ### Formas de onda y espectrogramas (STFT) por clase
 
-![Ejemplos por clase](figs/01_ejemplos_por_clase.png)
+![Ejemplos por clase](01_ejemplos_por_clase.png)
 
 Se observa que cada clase ocupa una región distinguible del plano tiempo-frecuencia: `tono_puro` y `campana` concentran energía en bandas horizontales estrechas (armónicos estacionarios vs. parciales inarmónicos decayendo), `sirena` traza una trayectoria senoidal en frecuencia, y `percusion`/`viento` son de banda ancha con envolventes temporales muy distintas (transitorio corto vs. modulación lenta).
 
@@ -49,19 +49,19 @@ Se observa que cada clase ocupa una región distinguible del plano tiempo-frecue
 
 Para cada señal se calculó la CWT usando una **ondícula compleja de Morlet** (`cmor1.5-1.0`, ancho de banda=1.5, frecuencia central=1.0), con 64 escalas espaciadas logarítmicamente cubriendo el rango de 40–2000 Hz (donde se concentra la energía de las 5 clases). Se tomó la magnitud de los coeficientes (**scalograma**), se aplicó compresión logarítmica (`log1p`, análoga al uso de dB en un espectrograma STFT) y se reescaló a una imagen fija de 64×64 con interpolación bilineal.
 
-Código: [`extraer_features_cwt.py`](extraer_features_cwt.py).
+Código: sección 3 de [`clasificacion_audio_wavelets_sintetico.ipynb`](clasificacion_audio_wavelets_sintetico.ipynb).
 
-![Scalogramas por clase](figs/02_scalogramas_por_clase.png)
+![Scalogramas por clase](02_scalogramas_por_clase.png)
 
 Los scalogramas confirman visualmente la separabilidad de las clases: `sirena` produce una curva senoidal nítida en el plano escala-tiempo, `percusion` un pulso vertical concentrado en t≈0, `viento` una banda difusa e intermitente, y `tono_puro`/`campana` bandas horizontales estables. Esta separación tan clara termina siendo la razón por la que ambos modelos clasifican sin errores (sección 4).
 
 ### 3.2 Modelos comparados
 
 1. **CNN sobre el scalograma completo** (enfoque de Dutt, 2020): 3 bloques Conv2D (16→32→64 filtros, kernel 3×3) con max-pooling, seguidos de *global average pooling*, una capa densa de 32 unidades con dropout 0.3, y softmax de 5 clases. Optimizador Adam, `sparse_categorical_crossentropy`, 30 épocas, batch size 16. ~25.5k parámetros.
-   Código: [`entrenar_cnn.py`](entrenar_cnn.py).
+   Código: sección 4 de [`clasificacion_audio_wavelets_sintetico.ipynb`](clasificacion_audio_wavelets_sintetico.ipynb).
 
 2. **Baseline clásico — RandomForest sobre estadísticos del scalograma**: en vez de darle la imagen completa a una red convolucional, se resumió cada una de las 64 bandas de escala con 4 estadísticos (media, desviación estándar, máximo, energía), generando un vector de 256 features por muestra. Se entrenó un `RandomForestClassifier` (300 árboles).
-   Código: [`entrenar_baseline.py`](entrenar_baseline.py).
+   Código: sección 5 de [`clasificacion_audio_wavelets_sintetico.ipynb`](clasificacion_audio_wavelets_sintetico.ipynb).
 
 Ambos modelos se evaluaron con la misma partición estratificada 75/25 (train/test), semilla fija (42) para reproducibilidad.
 
@@ -74,14 +74,14 @@ Ambos modelos se evaluaron con la misma partición estratificada 75/25 (train/te
 
 ### CNN sobre scalograma
 
-![Matriz de confusión CNN](figs/03_matriz_confusion_cnn.png)
-![Curvas de entrenamiento CNN](figs/04_curvas_entrenamiento_cnn.png)
+![Matriz de confusión CNN](03_matriz_confusion_cnn.png)
+![Curvas de entrenamiento CNN](04_curvas_entrenamiento_cnn.png)
 
 Sin errores en el conjunto de prueba (100/100). Las curvas de entrenamiento muestran una convergencia sana: *accuracy* de validación por encima de *train* (esperado, dropout solo activo en entrenamiento) y sin señales de sobreajuste, estabilizándose cerca de 1.0 desde el epoch ~20.
 
 ### RandomForest sobre features estadísticas
 
-![Matriz de confusión baseline](figs/05_matriz_confusion_baseline.png)
+![Matriz de confusión baseline](05_matriz_confusion_baseline.png)
 
 El baseline clásico también alcanzó accuracy perfecta en el conjunto de prueba.
 
@@ -102,15 +102,15 @@ Para confirmar que los hallazgos de la sección 5 no eran un artefacto del audio
 
 **Accuracy en test: 89.3 %** (375 muestras, 10 clases — nivel de azar 10 %).
 
-![Scalogramas por dígito](figs/07_scalogramas_por_digito_real.png)
+![Scalogramas por dígito](scalogramas_por_digito.png)
 
 Los scalogramas de voz real muestran mucha más variabilidad estructural que los sintéticos: cada dígito tiene una "huella" tiempo-escala reconocible (p. ej. el "0" es corto y concentrado en dos golpes de energía; el "1" y el "9" se extienden más en el tiempo con energía en escalas altas), pero también ruido y silencio (relleno) que la CNN tiene que aprender a ignorar.
 
-![Curvas de entrenamiento](figs/06_curvas_entrenamiento_real.png)
+![Curvas de entrenamiento](curvas_entrenamiento.png)
 
 El entrenamiento corrió 225 épocas (con `EarlyStopping`, `patience=20`, monitoreando `val_accuracy` sobre un split interno — el test set nunca se usó para decidir el punto de corte). *Accuracy* y *loss* de entrenamiento y validación evolucionan juntos sin señales de sobreajuste (la curva de validación no se despega ni diverge de la de entrenamiento); de hecho `val_accuracy` va ligeramente por encima de `train_accuracy` durante buena parte del entrenamiento, comportamiento esperado porque *dropout* solo está activo en entrenamiento, lo cual penaliza el accuracy de train de forma artificial.
 
-![Matriz de confusión](figs/08_matriz_confusion_real.png)
+![Matriz de confusión](matriz_confusion.png)
 
 | Dígito | Recall | Principal confusión |
 |---|---|---|
@@ -153,17 +153,11 @@ procesamiento-clasificacion-audio/
 ├── reporte_clasificacion_audio_wavelets.md         ← este reporte
 ├── clasificacion_audio_wavelets_sintetico.ipynb    ← pipeline completo del experimento sintético
 ├── clasificacion_audio_wavelets_real.ipynb         ← pipeline completo sobre spoken_mnist (real)
-├── generar_dataset.py                               ← scripts sueltos equivalentes al notebook sintético
-├── visualizar_ejemplos.py
-├── extraer_features_cwt.py
-├── visualizar_scalogramas.py
-├── entrenar_cnn.py
-├── entrenar_baseline.py
 ├── resumen_resultados_real.json                     ← métricas del experimento con audio real
 └── figs/                                            ← todas las figuras del reporte (01-05 sintético, 06-08 real)
 ```
 
-**Experimento sintético:** correr `clasificacion_audio_wavelets_sintetico.ipynb` completo (no requiere internet), o equivalentemente `generar_dataset.py` → `extraer_features_cwt.py` → `entrenar_cnn.py` / `entrenar_baseline.py` por separado.
+**Experimento sintético:** correr `clasificacion_audio_wavelets_sintetico.ipynb` completo, de principio a fin (no requiere internet, todo el audio se genera dentro del notebook).
 
 **Experimento real:** correr `clasificacion_audio_wavelets_real.ipynb` completo en un entorno con acceso a internet (Colab o Jupyter local) — descarga `spoken_mnist` vía `deeplake`, corre el mismo pipeline CWT + CNN y genera las figuras 06-08 y el JSON de resultados.
 
